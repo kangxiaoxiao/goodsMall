@@ -31,6 +31,25 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+//捕获登陆
+let whiteList=["/users/login","/users/loginOut","/goods"]
+app.use(function(req,res,next){
+   if(req.cookies.userId){
+     next();
+   }else{
+     if(whiteList.indexOf(req.path)==-1){
+        res.json({
+          status:"10001",
+          msg:"当前未登陆",
+          result:""
+        })
+     }else{
+       next();
+     }
+   }
+})
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/goods', goodsRouter);

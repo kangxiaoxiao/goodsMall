@@ -17,13 +17,14 @@
       </el-menu>
     </div>-->
     <el-row>
-      <el-col :span="20">
+      <el-col :span="18">
         <img src="@/assets/imoocLogo.png" alt="">
       </el-col>
-      <el-col :span="4">
+      <el-col :span="6">
         <div class="headerNavRight">
           <div class="item" v-if="!hasLogin"><a href="javascript:;" @click="openLogin">login</a></div>
           <div class="item" v-if="hasLogin">{{userName}}</div>
+          <div class="item" v-if="hasLogin"><a href="javascript:;" @click="openLoginOut">login out</a></div>
           <div class="item"><a href="javascript:;">购物车</a></div>
         </div>
 
@@ -37,21 +38,29 @@
       width="30%"
       center>
       <div class="loginBoxCon">
-        <el-form label-width="80px" >
-            <el-form-item>
+        <el-form
+          label-width="80px"
+          :rules="rules"
+          :model="loginForm"
+          ref="loginForm"
+        >
+            <el-form-item prop="userName">
               <span slot="label">账号：</span>
-              <el-input placeholder="请输入账号" v-model="userName"></el-input>
+              <el-input placeholder="请输入账号" v-model="loginForm.userName"></el-input>
             </el-form-item>
-          <el-form-item>
+          <el-form-item prop="userPwd">
             <span slot="label">密码：</span>
-            <el-input placeholder="请输入密码" v-model="userPwd" type="password"></el-input>
+            <el-input placeholder="请输入密码" v-model="loginForm.userPwd" type="password"></el-input>
           </el-form-item>
         </el-form>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary loginBtn" @click="login">登录</el-button>
+        <el-button type="primary loginBtn" @click="login('loginForm')">登录</el-button>
       </span>
     </el-dialog>
+
+
+
 
   </div>
 </template>
@@ -65,41 +74,81 @@ export default {
     return {
       activeIndex: '1',
       centerDialogVisible:false,
-      userName:"kangxiaoxiao",
-      userPwd:"123456",
+      userName:"",
+      loginForm:{
+        userName:"kangxiaoxiao",
+        userPwd:"123456"
+      },
+      rules:{
+        userName: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+        ],
+        userPwd: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+        ],
+      },
       hasLogin:false
     }
   },
   mixins:[commom],
   mounted:function(){
+    this.checkLogin();
+  },
+  components:{
 
   },
   methods: {
    /* handleSelect(key, keyPath) {
       console.log(key, keyPath);
     }*/
+    checkLogin(){
+      let _this=this;
+       axios.get("/users/checkLogin").then(response=>{
+         let res=response.data;
+         if(res.status==0){
+           _this.hasLogin=true;
+           _this.userName=res.result;
+         }
+       })
+    },
     openLogin(){
       this.centerDialogVisible=true;
     },
-    login(){
+    login(formName){
       console.log("登录");
       let _this=this;
-      let params={
-         "userName":this.userName,
-         "userPwd":this.userPwd
-      };
-      axios.post("users/login",params).then(response=>{
-        let res=response.data;
-        if(res.status==0){
-           _this.alertInfo("登录成功","success");
-           _this.hasLogin=true;
-           _this.centerDialogVisible=false;
-        }else{
-          console.log(res.msg)
-          _this.alertInfo(res.msg,"error");
-          _this.hasLogin=false;
-          _this.centerDialogVisible=true;
+      let params=Object.assign({},_this.loginForm);
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          axios.post("users/login",params).then(response=>{
+            let res=response.data;
+            if(res.status==0){
+              _this.alertInfo("登录成功","success");
+              _this.hasLogin=true;
+              _this.centerDialogVisible=false;
+              _this.userName=res.result;
+            }else{
+              console.log(res.msg)
+              _this.alertInfo(res.msg,"error");
+              _this.hasLogin=false;
+              _this.centerDialogVisible=true;
+            }
+          })
+        } else {
+          console.log('error submit!!');
+          return false;
         }
+      });
+    },
+    //openLoginOut
+    openLoginOut(){
+      let _this=this;
+      axios.post("users/loginOut").then(response=>{
+         let res=response.data;
+         if(res.status==0){
+           _this.hasLogin=false;
+           _this.alertInfo("退出登录成功","success")
+         }
       })
     }
   }

@@ -70,15 +70,36 @@
          </el-pagination>
        </div>
      </el-col>-->
+     <Model modalTitle="提示" :modelVisible="modelVisible" v-on:closeModel="closeModel">
+        <span slot="boxCon">
+              请先登陆,否则无法加入购物车！
+        </span>
+       <span slot="footerBtn">
+         <el-button @click="closeModel(false)">关闭</el-button>
+       </span>
+     </Model>
+
+     <Model modalTitle="提示" :modelVisible="modelVisible_cart" v-on:closeModel="closeCartModel">
+        <span slot="boxCon">
+              加入购物车成功！
+        </span>
+       <span slot="footerBtn">
+         <el-button @click="closeCartModel(false)">继续购物</el-button>
+         <el-button><router-link to="/cart">查看购物车</router-link></el-button>
+       </span>
+     </Model>
+
      <nav-footer class="footer">底部</nav-footer>
    </div>
 </template>
 
 <script>
   import "@/assets/css/base.css";
+  import commom from "@/assets/js/common";
   import NavHeader from  "@/components/header";
   import NavFooter from  "@/components/footer";
   import NavBread from  "@/components/bread";
+  import Model from "@/components/modal"
   import axios from "axios";
   export default {
       name: "goodsList",
@@ -91,6 +112,8 @@
              busy:true, //允许滚动
              checkLevel:null, //选中的价格区间
              loading:false,
+             modelVisible:false,
+            modelVisible_cart:false, //加入购物车成功modal状态
              pageInfo:{
                currentPage:1, //当前页
                pageSizes:pageSizes,
@@ -119,10 +142,12 @@
               overLayFlag:false, //遮罩
           }
       },
+      mixins:[commom],
       components:{
         NavHeader,
         NavFooter,
-        NavBread
+        NavBread,
+        Model
       },
       mounted:function(){
          this.getGoodsList();
@@ -181,14 +206,25 @@
         },
         //加入购物车
         addCart:function(productId){
+          let _this=this;
            axios.post("/goods/addCart",{"productId":productId}).then((response)=>{
              let res=response.data;
              if(res.status==0){
                console.log("添加成功");
+               /*_this.alertInfo("添加成功","success")*/
+               _this.modelVisible_cart=true;
              }else{
                console.log("添加失败");
+               /*_this.alertInfo(res.msg,"warning");*/
+               _this.modelVisible=true;
              }
            })
+        },
+        closeModel(modelVisible){
+           this.modelVisible=modelVisible;
+        },
+        closeCartModel(modelVisible){
+          this.modelVisible_cart=modelVisible||false
         },
         getActiveIndex:function(index){
           this.filterIndex=index;
