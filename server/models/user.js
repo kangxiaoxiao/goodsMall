@@ -4,7 +4,15 @@ var userSchema=new Schema({
        "userId":String,
        "userName":String,
        "userPwd":String,
-       "orderList":Array,
+       "orderList":[
+         { "orderId":String,
+           "orderTotal":Number,
+           "goodsList":Array,
+           "address":Object,
+           "orderStatus":String,
+           "createDate":String
+         }
+       ],
        "cartList":[{
            "productId":String,
            "productName":String,
@@ -13,7 +21,14 @@ var userSchema=new Schema({
            "checked":String,
            "productNum":String
       }],
-      "addressList":Array
+      "addressList":[{
+        "addressId" :String,
+        "userName" : String,
+        "streetName" : String,
+        "postCode" :Number,
+        "tel" : Number,
+        "isDefault" : Boolean
+      }]
 })
 let user=mongoose.model("User",userSchema,"users");
 module.exports=user;

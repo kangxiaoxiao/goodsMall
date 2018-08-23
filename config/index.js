@@ -16,6 +16,9 @@ module.exports = {
        },
       "/users":{
         target:"http://localhost:3000/"
+      },
+      "/cart":{
+        target:"http://localhost:3000/"
       }
     }, //代理,解决跨域的问题
 
