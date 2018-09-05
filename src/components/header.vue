@@ -23,9 +23,14 @@
       <el-col :span="6">
         <div class="headerNavRight">
           <div class="item" v-if="!hasLogin"><a href="javascript:;" @click="openLogin">login</a></div>
-          <div class="item" v-if="hasLogin">{{userName}}</div>
+          <div class="item" v-if="hasLogin">{{nickName}}</div>
           <div class="item" v-if="hasLogin"><a href="javascript:;" @click="openLoginOut">login out</a></div>
-          <div class="item"><a href="javascript:;">购物车</a></div>
+          <div class="item">
+            <div class="cartBtnWrapper">
+              <span >购物车</span>
+              <span class="countIcon" v-if="cartCount">{{cartCount}}</span>
+            </div>
+          </div>
         </div>
 
       </el-col>
@@ -97,6 +102,14 @@ export default {
   components:{
 
   },
+  computed:{
+    nickName(){
+      return this.$store.state.nickName
+    },
+    cartCount(){
+      return this.$store.state.cartCount
+    }
+  },
   methods: {
    /* handleSelect(key, keyPath) {
       console.log(key, keyPath);
@@ -107,7 +120,9 @@ export default {
          let res=response.data;
          if(res.status==0){
            _this.hasLogin=true;
-           _this.userName=res.result;
+           //_this.$store.state.nickName=res.result;
+           _this.$store.commit("updateUserInfo",res.result);
+           _this.getCartCount();
          }
        })
     },
@@ -126,7 +141,9 @@ export default {
               _this.alertInfo("登录成功","success");
               _this.hasLogin=true;
               _this.centerDialogVisible=false;
-              _this.userName=res.result;
+              //_this.$store.state.nickName=res.result;
+              _this.$store.commit("updateUserInfo",res.result);
+              _this.getCartCount();
             }else{
               console.log(res.msg)
               _this.alertInfo(res.msg,"error");
@@ -147,8 +164,21 @@ export default {
          let res=response.data;
          if(res.status==0){
            _this.hasLogin=false;
-           _this.alertInfo("退出登录成功","success")
+           _this.alertInfo("退出登录成功","success");
+           _this.getCartCount();
          }
+      })
+    },
+    getCartCount(){
+      let _this=this;
+      axios.get("users/getCartCount").then(response=>{
+        let res=response.data;
+        if(res.status==0){
+          let cartCount=res.result.count;
+          _this.$store.commit("getCartCount",cartCount)
+        }else{
+          _this.$store.commit("getCartCount","")
+        }
       })
     }
   }
@@ -163,9 +193,25 @@ export default {
         line-height:80px;
         display:inline-block;
         margin-right:15px;
+        .cartBtnWrapper{
+          font-size:0;
+          span{
+            font-size:14px;
+          }
+          .countIcon{
+            background:red;
+            padding:0 3px;
+            border-radius:20px;
+            color:#fff;
+            line-height:10px;
+            font-size:13px;
+          }
+        }
       }
     }
-  .loginBtn{
-    width:100%;
-  }
+    .loginBtn{
+      width:100%;
+    }
+
+
 </style>

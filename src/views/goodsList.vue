@@ -213,6 +213,7 @@
                console.log("添加成功");
                /*_this.alertInfo("添加成功","success")*/
                _this.modelVisible_cart=true;
+               _this.$store.commit("updateCartCount",1)
              }else{
                console.log("添加失败");
                /*_this.alertInfo(res.msg,"warning");*/

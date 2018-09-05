@@ -329,6 +329,37 @@ router.post("/payment",function(req,res,next){
    })
 
 });
+router.get("/getCartCount",function(req,res,next){
+  if(req.cookies && req.cookies.userId){
+    let userId=req.cookies.userId;
+    user.findOne({userId:userId},function(err,doc) {
+      if (err) {
+        res.json({
+          status: "1",
+          msg: err.message,
+          result: ""
+        })
+      }else{
+        let cartList=doc.cartList;
+        let count=0;
+        if(cartList && cartList.length>0){
+          cartList.forEach(item=>{
+            count+=parseInt(item.productNum)
+          })
+        };
+        res.json({
+          status: "0",
+          msg:"",
+          result: {
+            count:count
+          }
+        })
+      }
+    })
+  }
+
+})
+
 
 
 

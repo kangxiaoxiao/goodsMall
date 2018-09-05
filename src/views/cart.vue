@@ -27,7 +27,7 @@
               </el-col>
             </span>
             <span class="item txt">总计：{{(item.productNum)*(item.salePrice)}}</span>
-            <span class="item txt"><a  @click="sureDeleteGoods(item.productId)"><i class="el-icon-delete"></i></a></span>
+            <span class="item txt"><a  @click="sureDeleteGoods(item)"><i class="el-icon-delete"></i></a></span>
           </li>
         </ul>
         <div class="totalWrapper">
@@ -92,7 +92,7 @@
            selectAll:0,
            modelVisible:false,
            deleteModel:false,
-           deleteProductId:null,
+           deleteProduct:null,
            trueLabelValue:"1",
            falseLabelValue:"0",
         }
@@ -158,6 +158,14 @@
               console.log(res);
               if(res.status==0){
                 _this.getCartList();
+
+                let num=0;
+                if(type=="add"){
+                  num=1
+                }else if(type=="reduce"){
+                  num=-1
+                }
+                _this.$store.commit("updateCartCount",num);
               }else{
                 _this.alertInfo(res.msg,"warning");
               }
@@ -176,15 +184,14 @@
              }
            })
          },
-        sureDeleteGoods(productId){
+        sureDeleteGoods(item){
           this.deleteModel=true;
-          this.deleteProductId=productId;
+          this.deleteProduct=item;
         },
         deleteGoods(){
            let _this=this;
-           console.log(_this.deleteProductId)
            let params={
-             "productId":_this.deleteProductId
+             "productId":_this.deleteProduct.productId
            }
            axios.post("/cart/deleteGoods",params).then(response=>{
              let res=response.data;
@@ -192,6 +199,7 @@
              if(res.status==0){
                _this.alertInfo("删除成功","success");
                _this.getCartList();
+               _this.$store.commit("updateCartCount",-(parseInt(_this.deleteProduct.productNum)));
              }else{
                _this.alertInfo(res.msg,"warning");
              }
